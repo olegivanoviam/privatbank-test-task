@@ -14,9 +14,7 @@
       - ./init_primary.sql:/docker-entrypoint-initdb.d/init_primary.sql
       - ./schema:/schema
       - ./functions:/functions
-      - ./jobs:/jobs
       - ./scripts:/scripts
-      - ./replication:/replication
     command: >
       postgres
       -c wal_level=logical
