@@ -12,7 +12,7 @@
 ### Installation
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/olegivanoviam/privatbank-test-task.git
 cd privatbank-test-task
 
 # Start the system
@@ -135,24 +135,34 @@ docker-compose up -d
 ```
 privatbank-test-task/
 ├── docker-compose.yml              # Main orchestration
-├── schema/                         # Database schema
-│   ├── primary/                    # Primary server schema
+├── init_primary.sql               # Primary database initialization
+├── init_standby.sql               # Standby database initialization
+├── schema/                        # Database schema
+│   ├── primary/                   # Primary server schema
 │   │   ├── create_table_t1.sql
-│   │   └── create_materialized_view.sql
-│   └── standby/                    # Standby server schema
-├── functions/                      # PostgreSQL functions
-│   ├── 03_generate_test_data.sql
-│   └── 04_refresh_materialized_view.sql
-├── jobs/                          # Job functions
-│   ├── 05_scheduled_jobs.sql
-│   └── 06_job_management.sql
-├── replication/                   # Logical replication
-│   ├── 08_primary_setup_logical.sql
-│   ├── 09_replication_monitoring.sql
-│   └── logical_standby_init.sql
-└── scripts/                       # Setup scripts
-    ├── 07_setup_database.sql
-    └── 10_replication_setup.sql
+│   │   ├── create_materialized_view.sql
+│   │   └── setup_replication.sql
+│   └── standby/                   # Standby server schema
+│       ├── create_table_t1.sql
+│       └── setup_replication.sql
+├── functions/                     # PostgreSQL functions
+│   ├── check_data_quality.sql
+│   ├── check_job_status.sql
+│   ├── check_replication_status.sql
+│   ├── check_standby_status.sql
+│   ├── generate_test_data.sql
+│   ├── get_replication_lag.sql
+│   ├── job_insert_transaction.sql
+│   ├── job_update_status.sql
+│   ├── test_replication.sql
+│   └── verify_table_replication.sql
+├── scripts/                       # Setup scripts
+│   ├── primary_setup_database.sql
+│   ├── primary_setup_replication.sql
+│   ├── standby_setup_replication.sql
+│   └── verify_replication_status.sql
+├── README.md                      # This file
+└── TASK_DESCRIPTION.md           # Task requirements
 ```
 
 ---
