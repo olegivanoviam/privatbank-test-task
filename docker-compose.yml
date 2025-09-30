@@ -12,7 +12,7 @@
     volumes:
       - postgres_primary_data:/var/lib/postgresql/data
       - ./init_primary.sql:/docker-entrypoint-initdb.d/init_primary.sql
-      - ./schemas:/schemas
+      - ./schema:/schema
       - ./functions:/functions
       - ./jobs:/jobs
       - ./scripts:/scripts
@@ -54,6 +54,9 @@
     volumes:
       - postgres_standby_data:/var/lib/postgresql/data
       - ./init_standby.sql:/docker-entrypoint-initdb.d/init_standby.sql
+      - ./schema:/schema
+      - ./functions:/functions
+      - ./scripts:/scripts
     depends_on:
       postgres-primary:
         condition: service_healthy
