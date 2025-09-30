@@ -9,12 +9,26 @@ CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 -- So we just need to generate initial data and refresh the materialized view
 
 -- Generate initial test data (100k records)
-SELECT generate_test_data(100000, 1000);
+DO $$
+BEGIN
+    PERFORM generate_test_data(100000, 1000);
+    RAISE NOTICE 'Generated 100,000 test records successfully';
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Failed to generate test data: %', SQLERRM;
+END $$;
 
 -- Refresh materialized view
-REFRESH MATERIALIZED VIEW customer_totals;
+DO $$
+BEGIN
+    REFRESH MATERIALIZED VIEW customer_totals;
+    RAISE NOTICE 'Materialized view customer_totals refreshed successfully';
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'Failed to refresh materialized view: %', SQLERRM;
+END $$;
 
--- Replica identity for partitions is now set in create_table_t1.sql
+-- Replica identity for partitions is now set in schema/primary/setup_replication.sql
 
 -- Display completion message
 SELECT 'PrivatBank Test Task - Database Setup Complete!' as message;
