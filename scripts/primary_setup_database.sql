@@ -14,22 +14,7 @@ SELECT generate_test_data(100000, 1000);
 -- Refresh materialized view
 REFRESH MATERIALIZED VIEW customer_totals;
 
--- Set replica identity for all partition tables (required for logical replication)
-DO $$
-DECLARE 
-    r RECORD;
-BEGIN 
-    FOR r IN (SELECT tablename FROM pg_tables WHERE tablename LIKE 't1_%') 
-    LOOP 
-        BEGIN
-            EXECUTE 'ALTER TABLE ' || r.tablename || ' REPLICA IDENTITY FULL;';
-            RAISE NOTICE 'Set replica identity for partition: %', r.tablename;
-        EXCEPTION
-            WHEN OTHERS THEN
-                RAISE WARNING 'Failed to set replica identity for %: %', r.tablename, SQLERRM;
-        END;
-    END LOOP;
-END $$;
+-- Replica identity for partitions is now set in create_table_t1.sql
 
 -- Display completion message
 SELECT 'PrivatBank Test Task - Database Setup Complete!' as message;

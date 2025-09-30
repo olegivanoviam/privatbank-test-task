@@ -1,4 +1,4 @@
-﻿-- PrivatBank Test Task - Table T1 Schema
+-- PrivatBank Test Task - Table T1 Schema
 -- Partitioned table for transaction data
 
 -- Create the main partitioned table
@@ -19,7 +19,7 @@ CREATE TABLE t1_2024_01 PARTITION OF t1 FOR VALUES FROM ('2024-01-01') TO ('2024
 CREATE TABLE t1_2024_02 PARTITION OF t1 FOR VALUES FROM ('2024-02-01') TO ('2024-03-01');
 CREATE TABLE t1_2024_03 PARTITION OF t1 FOR VALUES FROM ('2024-03-01') TO ('2024-04-01');
 CREATE TABLE t1_2024_04 PARTITION OF t1 FOR VALUES FROM ('2024-04-01') TO ('2024-05-01');
-CREATE TABLE t1_2024_05 PARTITION OF t1 FOR VALUES FROM ('2024-05-01') TO ('2024-06-01');
+CREATE TABLE t1_2024_05 PARTITION OF t1 FOR VALUES FROM ('2025-01-01') TO ('2025-02-01');
 CREATE TABLE t1_2024_06 PARTITION OF t1 FOR VALUES FROM ('2024-06-01') TO ('2024-07-01');
 CREATE TABLE t1_2024_07 PARTITION OF t1 FOR VALUES FROM ('2024-07-01') TO ('2024-08-01');
 CREATE TABLE t1_2024_08 PARTITION OF t1 FOR VALUES FROM ('2024-08-01') TO ('2024-09-01');
@@ -58,11 +58,10 @@ CREATE INDEX idx_t1_customer_id ON t1 USING GIN ((message->>'customer_id') gin_t
 CREATE INDEX idx_t1_account_number ON t1 USING GIN ((message->>'account_number') gin_trgm_ops);
 CREATE INDEX idx_t1_operation_type ON t1 USING GIN ((message->>'operation_type') gin_trgm_ops);
 
--- Set replica identity for logical replication support
-ALTER TABLE t1 REPLICA IDENTITY FULL;
+-- Replica identity setup is now in setup_replication.sql
 
 -- Add comments
-COMMENT ON TABLE t1 IS 'Partitioned transaction table for PrivatBank test task with FULL replica identity for logical replication';
+COMMENT ON TABLE t1 IS 'Partitioned transaction table for PrivatBank test task';
 COMMENT ON COLUMN t1.date IS 'Transaction date (used for partitioning)';
 COMMENT ON COLUMN t1.id IS 'Sequential transaction ID';
 COMMENT ON COLUMN t1.amount IS 'Transaction amount';
