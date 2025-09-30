@@ -135,9 +135,11 @@ docker-compose up -d
 ```
 privatbank-test-task/
 ├── docker-compose.yml              # Main orchestration
-├── schemas/                        # Database schema
-│   ├── 01_create_table_t1.sql
-│   └── 02_create_materialized_view.sql
+├── schema/                         # Database schema
+│   ├── primary/                    # Primary server schema
+│   │   ├── create_table_t1.sql
+│   │   └── create_materialized_view.sql
+│   └── standby/                    # Standby server schema
 ├── functions/                      # PostgreSQL functions
 │   ├── 03_generate_test_data.sql
 │   └── 04_refresh_materialized_view.sql

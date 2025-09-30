@@ -6,10 +6,10 @@
 -- ==============================================
 
 -- Create the main partitioned table T1
-\i schemas/create_table_t1.sql
+\i schema/primary/create_table_t1.sql
 
 -- Create materialized view (depends on table T1)
-\i schemas/create_materialized_view.sql
+\i schema/primary/create_materialized_view.sql
 
 -- ==============================================
 -- STEP 2: CREATE FUNCTIONS
@@ -31,10 +31,10 @@
 -- ==============================================
 
 -- Generate test data and setup database
-\i scripts/setup_database.sql
+\i scripts/primary_setup_database.sql
 
 -- Setup primary server for logical replication
-\i replication/primary_setup_logical.sql
+\i scripts/primary_setup_replication.sql
 
 -- ==============================================
 -- STEP 4: MONITORING AND VERIFICATION
@@ -50,7 +50,7 @@
 \i functions/test_replication.sql
 
 -- Verify replication setup
-\i scripts/replication_setup.sql
+\i scripts/verify_replication_status.sql
 
 -- ==============================================
 -- INITIALIZATION COMPLETE
