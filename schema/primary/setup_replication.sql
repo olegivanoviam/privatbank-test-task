@@ -4,19 +4,23 @@
 -- Set replica identity for logical replication
 ALTER TABLE t1 REPLICA IDENTITY FULL;
 
--- Set replica identity for all partition tables (required for logical replication)
+-- Set replica identity for all partitions
 DO $$
-DECLARE 
-    r RECORD;
-BEGIN 
-    FOR r IN (SELECT tablename FROM pg_tables WHERE tablename LIKE 't1_%') 
-    LOOP 
+DECLARE
+    partition_name TEXT;
+BEGIN
+    FOR partition_name IN 
+        SELECT schemaname||'.'||tablename 
+        FROM pg_tables 
+        WHERE tablename LIKE 't1_%' 
+        AND schemaname = 'public'
+    LOOP
         BEGIN
-            EXECUTE 'ALTER TABLE ' || r.tablename || ' REPLICA IDENTITY FULL;';
-            RAISE NOTICE 'Set replica identity for partition: %', r.tablename;
+            EXECUTE 'ALTER TABLE ' || partition_name || ' REPLICA IDENTITY FULL';
+            RAISE NOTICE 'Set REPLICA IDENTITY FULL for %', partition_name;
         EXCEPTION
             WHEN OTHERS THEN
-                RAISE WARNING 'Failed to set replica identity for %: %', r.tablename, SQLERRM;
+                RAISE WARNING 'Could not set REPLICA IDENTITY FULL for %: %', partition_name, SQLERRM;
         END;
     END LOOP;
 END $$;
