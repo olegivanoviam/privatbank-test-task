@@ -11,15 +11,12 @@
       - "5432:5432"
     volumes:
       - postgres_primary_data:/var/lib/postgresql/data
-      - ./schemas/01_create_table_t1.sql:/docker-entrypoint-initdb.d/01_create_table_t1.sql
-      - ./schemas/02_create_materialized_view.sql:/docker-entrypoint-initdb.d/02_create_materialized_view.sql
-      - ./functions/03_generate_test_data.sql:/docker-entrypoint-initdb.d/03_generate_test_data.sql
-      - ./jobs/05_scheduled_jobs.sql:/docker-entrypoint-initdb.d/05_scheduled_jobs.sql
-      - ./jobs/06_job_management.sql:/docker-entrypoint-initdb.d/06_job_management.sql
-      - ./scripts/07_setup_database.sql:/docker-entrypoint-initdb.d/07_setup_database.sql
-      - ./replication/08_primary_setup_logical.sql:/docker-entrypoint-initdb.d/08_primary_setup.sql
-      - ./replication/09_replication_monitoring.sql:/docker-entrypoint-initdb.d/09_replication_monitoring.sql
-      - ./scripts/10_replication_setup.sql:/docker-entrypoint-initdb.d/10_replication_setup.sql
+      - ./init_primary.sql:/docker-entrypoint-initdb.d/init_primary.sql
+      - ./schemas:/schemas
+      - ./functions:/functions
+      - ./jobs:/jobs
+      - ./scripts:/scripts
+      - ./replication:/replication
     command: >
       postgres
       -c wal_level=logical
@@ -56,7 +53,7 @@
       - "5433:5432"
     volumes:
       - postgres_standby_data:/var/lib/postgresql/data
-      - ./replication/logical_standby_init.sql:/docker-entrypoint-initdb.d/logical_standby_init.sql
+      - ./init_standby.sql:/docker-entrypoint-initdb.d/init_standby.sql
     depends_on:
       postgres-primary:
         condition: service_healthy
