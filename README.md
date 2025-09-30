@@ -1,33 +1,158 @@
-## Тестове завдання
+﻿# PrivatBank Test Task
 
-> Назви таблиць/полів/функцій у завданні не сприймати «буквально», окрім явно вказаних назв та типів.
+> **PostgreSQL Database Implementation** with Automated Job Scheduling and Logical Replication
 
-1. Створити партиціоновану таблицю `Т1` з полями: `дата`, `айді`, `сума`, `стан`, `гуід операції`, `повідомлення` (JSONB),
-   де `повідомлення` включає номер рахунку, айді клієнта та тип операції (онлайн/офлайн).
-2. Згенерувати дані для заповнення таблиці `Т1` за допомогою збереженої процедури чи функції
-   (загалом не менше 100 тис. рядків за період три або чотири місяці).
-3. Забезпечити унікальність даних по полю `гуід операції`.
-4. Створити регламентне завдання, яке викликає функцію/процедуру додавання запису в таблицю `Т1` кожні `5` секунд зі `стан` = `0`.
-5. Створити регламентне завдання, яке кожні `3` секунди оновлює поле `стан` таблиці `Т1` з `0` на `1` для парних та непарних `айді`
-   (якщо кількість секунд парна — оновлюються парні айді; інакше — непарні).
-6. Створити механізм зберігання поточної загальної суми поля `сума` по `айді клієнта` та `типу` операції у матеріалізованому представленні
-   з оновленням при кожному переході `стан` таблиці `Т1` з `0` на `1`.
-7. Налаштувати реплікацію створеної таблиці `Т1` на інший інстанс.
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker and Docker Compose installed
+- 4GB RAM minimum
+- 2GB disk space
+
+### Installation
+```bash
+# Clone the repository
+git clone <repository-url>
+cd privatbank-test-task
+
+# Start the system
+docker-compose up -d
+
+# Verify everything is running
+docker-compose ps
+```
+
+## 📊 System Overview
+
+### What's Included
+- **📋 Partitioned Table T1** - 100k+ test records with monthly partitions
+- **⏰ Automated Jobs** - Insert every 5s, update every 3s
+- **📈 Materialized View** - Customer totals with auto-refresh
+- **🔄 Logical Replication** - Primary-standby setup
+- **📊 Monitoring Functions** - System health and data quality checks
+
+### Architecture
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   PRIMARY       │    │   STANDBY       │    │   SCHEDULER     │
+│   Port: 5432    │◄───┤   Port: 5433    │    │   Job Runner    │
+│   Main DB       │    │   Replicated    │    │   Auto Tasks    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+## 🛠️ Management Commands
+
+### Database Access
+```bash
+# Connect to primary database
+docker-compose exec postgres-primary psql -U postgres -d privatebank_test
+
+# Connect to standby database
+docker-compose exec postgres-standby psql -U postgres -d privatebank_test
+```
+
+### Monitoring
+```bash
+# Check replication status
+docker-compose exec postgres-primary psql -U postgres -d privatebank_test -c "SELECT * FROM check_replication_status();"
+
+# Check data counts
+docker-compose exec postgres-primary psql -U postgres -d privatebank_test -c "SELECT COUNT(*) FROM t1;"
+docker-compose exec postgres-standby psql -U postgres -d privatebank_test -c "SELECT COUNT(*) FROM t1;"
+
+# Check job status
+docker-compose exec postgres-primary psql -U postgres -d privatebank_test -c "SELECT * FROM check_job_status();"
+```
+
+### System Control
+```bash
+# Start system
+docker-compose up -d
+
+# Stop system
+docker-compose down
+
+# View logs
+docker-compose logs
+
+# Restart services
+docker-compose restart
+```
+
+## 📋 Task Requirements
+
+✅ **Partitioned table T1** - Monthly partitions by date  
+✅ **100k+ test data** - Generated over 3-4 months  
+✅ **Unique operation_guid** - UUID constraint  
+✅ **Scheduled insert job** - Every 5 seconds, status=0  
+✅ **Scheduled update job** - Every 3 seconds, even/odd based on seconds  
+✅ **Materialized view** - Customer totals with automatic refresh  
+✅ **Logical replication** - Table T1 replicated to standby instance  
+
+## 🔧 Technical Details
+
+### Database Schema
+- **Table T1**: Partitioned by date with JSONB message field
+- **Indexes**: Optimized for performance with GIN indexes on JSONB
+- **Constraints**: Unique operation_guid per date
+- **Partitions**: 24 monthly partitions (2024-2025)
+
+### Replication
+- **Type**: Logical replication (table-specific)
+- **Primary**: Publishes changes to `privatbank_publication`
+- **Standby**: Subscribes to publication for real-time sync
+- **Monitoring**: Built-in replication status functions
+
+### Job Scheduling
+- **Insert Job**: Adds new records every 5 seconds
+- **Update Job**: Updates status every 3 seconds (even/odd pattern)
+- **Scheduler**: Docker container with continuous loop execution
+
+## 🚨 Troubleshooting
+
+### Common Issues
+```bash
+# Services won't start
+docker-compose logs
+docker-compose down && docker-compose up -d
+
+# Database connection issues
+docker-compose exec postgres-primary pg_isready -U postgres
+
+# Check resource usage
+docker stats
+```
+
+### Reset System
+```bash
+# Complete reset (removes all data)
+docker-compose down -v
+docker-compose up -d
+```
+
+## 📁 Project Structure
+
+```
+privatbank-test-task/
+├── docker-compose.yml              # Main orchestration
+├── schemas/                        # Database schema
+│   ├── 01_create_table_t1.sql
+│   └── 02_create_materialized_view.sql
+├── functions/                      # PostgreSQL functions
+│   ├── 03_generate_test_data.sql
+│   └── 04_refresh_materialized_view.sql
+├── jobs/                          # Job functions
+│   ├── 05_scheduled_jobs.sql
+│   └── 06_job_management.sql
+├── replication/                   # Logical replication
+│   ├── 08_primary_setup_logical.sql
+│   ├── 09_replication_monitoring.sql
+│   └── logical_standby_init.sql
+└── scripts/                       # Setup scripts
+    ├── 07_setup_database.sql
+    └── 10_replication_setup.sql
+```
 
 ---
 
-## Test Task (English)
-
-> Do not treat table/field/function names literally, except where names and types are explicitly specified.
-
-1. Create a partitioned table `T1` with fields: `date`, `id`, `amount`, `status`, `operation_guid`, `message` (JSONB),
-   where `message` includes account number, customer id, and operation type (online/offline).
-2. Generate data to populate table `T1` using a stored procedure or function
-   (at least 100k rows in total over a period of three or four months).
-3. Ensure uniqueness of data by the `operation_guid` field.
-4. Create a scheduled job that calls the function/procedure to insert a record into table `T1` every `5` seconds with `status` = `0`.
-5. Create a scheduled job that every `3` seconds updates the `status` field in table `T1` from `0` to `1` for even and odd `id`s
-   (if the current seconds value is even — update even ids; otherwise — odd ids).
-6. Create a mechanism to store the current total of the `amount` field by `customer id` and operation `type` in a materialized view,
-   refreshing it on every change of `status` in table `T1` from `0` to `1`.
-7. Configure replication of the created table `T1` to another instance.
+**Built with ❤️ using PostgreSQL, Docker, and Logical Replication**

@@ -1,0 +1,132 @@
+﻿services:
+  postgres-primary:
+    image: postgres:15
+    container_name: privatbank_postgres_primary
+    environment:
+      POSTGRES_DB: privatebank_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_primary_data:/var/lib/postgresql/data
+      - ./schemas/01_create_table_t1.sql:/docker-entrypoint-initdb.d/01_create_table_t1.sql
+      - ./schemas/02_create_materialized_view.sql:/docker-entrypoint-initdb.d/02_create_materialized_view.sql
+      - ./functions/03_generate_test_data.sql:/docker-entrypoint-initdb.d/03_generate_test_data.sql
+      - ./functions/04_refresh_materialized_view.sql:/docker-entrypoint-initdb.d/04_refresh_materialized_view.sql
+      - ./jobs/05_scheduled_jobs.sql:/docker-entrypoint-initdb.d/05_scheduled_jobs.sql
+      - ./jobs/06_job_management.sql:/docker-entrypoint-initdb.d/06_job_management.sql
+      - ./scripts/07_setup_database.sql:/docker-entrypoint-initdb.d/07_setup_database.sql
+      - ./replication/08_primary_setup_logical.sql:/docker-entrypoint-initdb.d/08_primary_setup.sql
+      - ./replication/09_replication_monitoring.sql:/docker-entrypoint-initdb.d/09_replication_monitoring.sql
+      - ./scripts/10_replication_setup.sql:/docker-entrypoint-initdb.d/10_replication_setup.sql
+    command: >
+      postgres
+      -c wal_level=logical
+      -c max_replication_slots=3
+      -c max_wal_senders=3
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d privatebank_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - privatbank_network
+
+  postgres-standby:
+    image: postgres:15
+    container_name: privatbank_postgres_standby
+    environment:
+      POSTGRES_DB: privatebank_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_standby_data:/var/lib/postgresql/data
+      - ./replication/logical_standby_init.sql:/docker-entrypoint-initdb.d/logical_standby_init.sql
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    command: >
+      postgres
+      -c wal_level=logical
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d privatebank_test"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - privatbank_network
+
+  scheduler:
+    image: postgres:15
+    container_name: privatbank_scheduler
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: postgres
+    volumes:
+      - ./scripts:/scripts
+    command: >
+      bash -c "
+      until pg_isready -h postgres-primary -p 5432 -U postgres; do 
+        echo 'Waiting for primary postgres...'
+        sleep 2
+      done
+      
+      echo 'Primary PostgreSQL is ready, starting job scheduler...'
+      
+      while true; do
+        psql -h postgres-primary -U postgres -d privatebank_test -c 'SELECT job_insert_transaction();' > /dev/null 2>&1
+        sleep 5
+        psql -h postgres-primary -U postgres -d privatebank_test -c 'SELECT job_update_status();' > /dev/null 2>&1 &
+        sleep 3
+      done
+      "
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - privatbank_network
+
+volumes:
+  postgres_primary_data:
+  postgres_standby_data:
+
+networks:
+  privatbank_network:
+    driver: bridge
