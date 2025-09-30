@@ -12,8 +12,7 @@
 -- STEP 2: CREATE INDEXES
 -- ==============================================
 
--- Create indexes to match primary structure
-\i schema/standby/create_indexes.sql
+-- Indexes are created as part of create_table_t1.sql
 
 -- ==============================================
 -- STEP 3: SETUP REPLICATION
