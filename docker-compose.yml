@@ -14,7 +14,6 @@
       - ./schemas/01_create_table_t1.sql:/docker-entrypoint-initdb.d/01_create_table_t1.sql
       - ./schemas/02_create_materialized_view.sql:/docker-entrypoint-initdb.d/02_create_materialized_view.sql
       - ./functions/03_generate_test_data.sql:/docker-entrypoint-initdb.d/03_generate_test_data.sql
-      - ./functions/04_refresh_materialized_view.sql:/docker-entrypoint-initdb.d/04_refresh_materialized_view.sql
       - ./jobs/05_scheduled_jobs.sql:/docker-entrypoint-initdb.d/05_scheduled_jobs.sql
       - ./jobs/06_job_management.sql:/docker-entrypoint-initdb.d/06_job_management.sql
       - ./scripts/07_setup_database.sql:/docker-entrypoint-initdb.d/07_setup_database.sql

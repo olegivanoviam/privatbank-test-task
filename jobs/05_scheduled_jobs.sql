@@ -68,8 +68,7 @@ BEGIN
         UPDATE t1 
         SET status = 1, updated_at = NOW()
         WHERE status = 0 
-        AND id % 2 = 0
-        AND created_at < NOW() - INTERVAL '5 minutes';
+        AND id % 2 = 0;
         
         GET DIAGNOSTICS updated_count = ROW_COUNT;
         
@@ -81,8 +80,7 @@ BEGIN
         UPDATE t1 
         SET status = 1, updated_at = NOW()
         WHERE status = 0 
-        AND id % 2 = 1
-        AND created_at < NOW() - INTERVAL '5 minutes';
+        AND id % 2 = 1;
         
         GET DIAGNOSTICS updated_count = ROW_COUNT;
         
