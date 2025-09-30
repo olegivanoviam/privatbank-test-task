@@ -28,7 +28,5 @@ EXCEPTION
         RAISE WARNING 'Failed to refresh materialized view: %', SQLERRM;
 END $$;
 
--- Replica identity for partitions is now set in schema/primary/setup_replication.sql
-
 -- Display completion message
 SELECT 'PrivatBank Test Task - Database Setup Complete!' as message;
