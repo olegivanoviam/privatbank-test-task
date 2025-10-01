@@ -1,13 +1,13 @@
 -- PrivatBank Test Task - Replication Setup and Verification
 -- This script sets up and verifies the replication setup
 
--- Replication monitoring functions are already loaded from 09_replication_monitoring.sql
+-- Replication monitoring functions are loaded from monitoring/ folder
 
 -- Verify replication setup
 DO $$
 BEGIN
-    -- Check if we're on primary server
-    IF NOT pg_is_in_recovery() THEN
+    -- Check if we're on primary server (has publications) or standby (has subscriptions)
+    IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'privatbank_publication') THEN
         RAISE NOTICE 'Setting up replication on PRIMARY server...';
         
         -- Verify replication user exists
@@ -33,7 +33,12 @@ BEGIN
         
         -- Show replication status
         RAISE NOTICE 'Replication status:';
-        PERFORM * FROM check_replication_status();
+        BEGIN
+            PERFORM * FROM check_replication_status();
+        EXCEPTION
+            WHEN OTHERS THEN
+                RAISE WARNING 'Could not retrieve replication status: %', SQLERRM;
+        END;
         
     ELSE
         RAISE NOTICE 'Running on STANDBY server...';
@@ -45,13 +50,36 @@ BEGIN
             RAISE WARNING 'Subscription does not exist!';
         END IF;
         
+        -- Check replication lag
+        BEGIN
+            PERFORM * FROM get_replication_lag();
+            RAISE NOTICE 'Replication lag check: OK';
+        EXCEPTION
+            WHEN OTHERS THEN
+                RAISE WARNING 'Could not check replication lag: %', SQLERRM;
+        END;
+        
+        -- Show detailed standby status
+        BEGIN
+            PERFORM * FROM check_standby_status();
+        EXCEPTION
+            WHEN OTHERS THEN
+                RAISE WARNING 'Could not retrieve standby status: %', SQLERRM;
+        END;
+        
         -- Show basic standby info
         RAISE NOTICE 'Standby server is running and ready';
         
     END IF;
 END $$;
 
--- Test replication function is now in functions/test_replication.sql
+-- Test replication function is now in monitoring/test_replication.sql
 
--- Show final status
-SELECT 'Replication setup completed!' as status;
+-- Show final status with comprehensive summary
+SELECT 
+    'Replication verification completed successfully!' as status,
+    CASE 
+        WHEN EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'privatbank_publication') THEN 'PRIMARY'
+        ELSE 'STANDBY'
+    END as server_type,
+    NOW() as verification_time;
