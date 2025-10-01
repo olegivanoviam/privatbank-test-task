@@ -2,7 +2,15 @@
 -- This script initializes the primary database with all required components
 
 -- ==============================================
--- STEP 1: CREATE DATABASE SCHEMA
+-- STEP 1: CREATE REQUIRED EXTENSIONS
+-- ==============================================
+
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- ==============================================
+-- STEP 2: CREATE DATABASE SCHEMA
 -- ==============================================
 
 -- Create the main partitioned table T1
@@ -15,7 +23,7 @@
 \i schema/configure_table_replication.sql
 
 -- ==============================================
--- STEP 2: CREATE FUNCTIONS
+-- STEP 3: CREATE FUNCTIONS
 -- ==============================================
 
 -- Create data generation function
@@ -28,36 +36,36 @@
 \i functions/job_insert_transaction.sql
 \i functions/job_update_status.sql
 
--- Create job management functions
-\i monitoring/check_job_status.sql
-\i monitoring/check_data_quality.sql
-
 -- ==============================================
--- STEP 3: SETUP REPLICATION FIRST
+-- STEP 4: SETUP REPLICATION FIRST
 -- ==============================================
 
 -- Setup primary server for logical replication (BEFORE data insertion)
 \i scripts/primary_setup_replication.sql
 
 -- ==============================================
--- STEP 4: GENERATE DATA (WITH REPLICATION)
+-- STEP 5: GENERATE DATA (WITH REPLICATION)
 -- ==============================================
 
 -- Generate test data and setup database (AFTER replication is ready)
 \i scripts/primary_setup_database.sql
 
 -- ==============================================
--- STEP 5: MONITORING AND VERIFICATION
+-- STEP 6: CREATE MONITORING FUNCTIONS
 -- ==============================================
 
--- Create replication monitoring functions
+-- Create all monitoring functions (consolidated)
+\i monitoring/check_job_status.sql
+\i monitoring/check_data_quality.sql
 \i monitoring/check_replication_status.sql
 \i monitoring/check_standby_status.sql
 \i monitoring/verify_table_replication.sql
 \i monitoring/get_replication_lag.sql
-
--- Create test replication function
 \i monitoring/test_replication.sql
+
+-- ==============================================
+-- STEP 7: VERIFY REPLICATION SETUP
+-- ==============================================
 
 -- Verify replication setup
 \i scripts/verify_replication_status.sql
