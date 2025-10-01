@@ -135,32 +135,32 @@ docker-compose up -d
 ```
 privatbank-test-task/
 ├── docker-compose.yml              # Main orchestration
+├── scheduler.sh                    # Job scheduler script
 ├── init_primary.sql               # Primary database initialization
 ├── init_standby.sql               # Standby database initialization
-├── schema/                        # Database schema
-│   ├── primary/                   # Primary server schema
-│   │   ├── create_table_t1.sql
-│   │   ├── create_materialized_view.sql
-│   │   └── setup_replication.sql
-│   └── standby/                   # Standby server schema
-│       ├── create_table_t1.sql
-│       └── setup_replication.sql
-├── functions/                     # PostgreSQL functions
-│   ├── check_data_quality.sql
-│   ├── check_job_status.sql
-│   ├── check_replication_status.sql
-│   ├── check_standby_status.sql
-│   ├── generate_test_data.sql
-│   ├── get_replication_lag.sql
-│   ├── job_insert_transaction.sql
-│   ├── job_update_status.sql
-│   ├── test_replication.sql
-│   └── verify_table_replication.sql
-├── scripts/                       # Setup scripts
-│   ├── primary_setup_database.sql
-│   ├── primary_setup_replication.sql
-│   ├── standby_setup_replication.sql
-│   └── verify_replication_status.sql
+├── schema/                        # Shared database schema
+│   ├── create_table_t1.sql        # Partitioned table definition
+│   ├── create_materialized_view.sql # Customer totals view
+│   └── configure_table_replication.sql # Replication setup
+├── functions/                     # Core PostgreSQL functions
+│   ├── generate_test_data.sql     # Data generation function
+│   ├── job_insert_transaction.sql # Insert job function
+│   ├── job_update_status.sql      # Update job function
+│   └── refresh_materialized_view.sql # MV refresh function
+├── monitoring/                    # Monitoring functions
+│   ├── check_data_quality.sql     # Data quality checks
+│   ├── check_job_status.sql       # Job status monitoring
+│   ├── check_replication_status.sql # Replication health
+│   ├── check_standby_status.sql   # Standby monitoring
+│   ├── get_replication_lag.sql    # Lag measurement
+│   ├── test_replication.sql       # Replication testing
+│   └── verify_table_replication.sql # Table replication check
+├── scripts/                       # Setup and utility scripts
+│   ├── primary_setup_database.sql # Primary data setup
+│   ├── primary_setup_replication.sql # Primary replication setup
+│   ├── standby_setup_replication.sql # Standby subscription
+│   ├── verify_replication_status.sql # Replication verification
+│   └── primary_health_check.sh    # Primary health check
 ├── README.md                      # This file
 └── TASK_DESCRIPTION.md           # Task requirements
 ```
