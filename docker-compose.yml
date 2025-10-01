@@ -93,22 +93,8 @@ services:
       PGPASSWORD: postgres
     volumes:
       - ./scripts:/scripts
-    command: >
-      bash -c "
-      until pg_isready -h postgres-primary -p 5432 -U postgres; do 
-        echo 'Waiting for primary postgres...'
-        sleep 2
-      done
-      
-      echo 'Primary PostgreSQL is ready, starting job scheduler...'
-      
-      while true; do
-        psql -h postgres-primary -U postgres -d privatbank_test -c 'SELECT job_insert_transaction();' > /dev/null 2>&1
-        sleep 5
-        psql -h postgres-primary -U postgres -d privatbank_test -c 'SELECT job_update_status();' > /dev/null 2>&1 &
-        sleep 3
-      done
-      "
+      - ./scheduler.sh:/scheduler.sh
+    command: ["/scheduler.sh"]
     restart: unless-stopped
     deploy:
       resources:
