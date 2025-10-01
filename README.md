@@ -5,11 +5,24 @@
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Docker and Docker Compose installed
-- 4GB RAM minimum
-- 2GB disk space
+- **Docker Desktop** installed and running
+- **4GB RAM** minimum
+- **2GB disk space**
 
-### Installation
+### Option 1: Automated Setup (Recommended)
+```bash
+# Clone the repository
+git clone https://github.com/olegivanoviam/privatbank-test-task.git
+cd privatbank-test-task
+
+# Run the automated setup (Linux/Mac)
+./run_solution.sh
+
+# Or run the automated setup (Windows)
+run_solution.bat
+```
+
+### Option 2: Manual Setup
 ```bash
 # Clone the repository
 git clone https://github.com/olegivanoviam/privatbank-test-task.git
@@ -18,8 +31,16 @@ cd privatbank-test-task
 # Start the system
 docker-compose up -d
 
+# Wait for initialization (2-3 minutes)
 # Verify everything is running
 docker-compose ps
+```
+
+### Option 3: Complete Validation
+```bash
+# After setup, run comprehensive tests
+./test_solution.sh        # Linux/Mac
+test_solution.bat         # Windows
 ```
 
 ## 📊 System Overview
