@@ -10,23 +10,27 @@
 - **2GB disk space**
 - **Git** (optional, for cloning)
 
-### Option 1: Run from Git Repository
+### Option 1: Automated Setup (Recommended)
 ```bash
 # Clone the repository
 git clone https://github.com/olegivanoviam/privatbank-test-task.git
 cd privatbank-test-task
 
-# Start the system
-docker-compose up -d
+# Run automated setup (Linux/Mac)
+./run_solution.sh
 
-# Verify everything is running
-docker-compose ps
+# Or run automated setup (Windows)
+run_solution.bat
+
+# For cold start (cleanup + restart)
+./run_solution.sh --cold        # Linux/Mac
+run_solution.bat --cold         # Windows
 ```
 
-### Option 2: Run from Downloaded Files
+### Option 2: Manual Setup
 ```bash
-# Extract the project files to a folder
-# Navigate to the project directory
+# Clone the repository
+git clone https://github.com/olegivanoviam/privatbank-test-task.git
 cd privatbank-test-task
 
 # Start the system
@@ -44,31 +48,31 @@ docker-compose ps
 ```
 **Expected Output:**
 ```
-NAME                          IMAGE         STATUS
-privatbank_postgres_primary   postgres:15   Up (healthy)
-privatbank_postgres_standby   postgres:15   Up (healthy)
-privatbank_scheduler          postgres:15   Up
+CONTAINER ID   IMAGE         COMMAND                  CREATED          STATUS                        PORTS                                         NAMES
+xxxxxxxxxxxxx   postgres:15   "docker-entrypoint.s…"   X minutes ago    Up X minutes (healthy)        0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp   privatbank_postgres_primary
+xxxxxxxxxxxxx   postgres:15   "docker-entrypoint.s…"   X minutes ago    Up X minutes (healthy)        0.0.0.0:5433->5432/tcp, [::]:5433->5432/tcp   privatbank_postgres_standby
+xxxxxxxxxxxxx   postgres:15   "docker-entrypoint.s…"   X minutes ago    Up X minutes                  5432/tcp                                      privatbank_scheduler
 ```
 
 ### 2. Verify Database Records
 ```bash
 # Check primary database records
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
 
 # Check standby database records
-docker-compose exec postgres-standby psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
+docker exec privatbank_postgres_standby psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
 ```
 **Expected:** Both should show 100,000+ records
 
 ### 3. Check Replication Status
 ```bash
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_replication_status();"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_replication_status();"
 ```
 **Expected:** Shows active WAL senders and replication slots
 
 ### 4. Verify Jobs are Running
 ```bash
-docker-compose logs scheduler --tail=10
+docker logs privatbank_scheduler --tail=10
 ```
 **Expected:** Shows insert and update jobs running every 5s and 3s
 
@@ -77,26 +81,26 @@ docker-compose logs scheduler --tail=10
 ### Database Access
 ```bash
 # Connect to primary database
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test
+docker exec -it privatbank_postgres_primary psql -U postgres -d privatbank_test
 
 # Connect to standby database
-docker-compose exec postgres-standby psql -U postgres -d privatbank_test
+docker exec -it privatbank_postgres_standby psql -U postgres -d privatbank_test
 ```
 
 ### Monitoring
 ```bash
 # Check replication status
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_replication_status();"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_replication_status();"
 
 # Check data counts
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
-docker-compose exec postgres-standby psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
+docker exec privatbank_postgres_standby psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
 
 # Check job status
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_job_status();"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_job_status();"
 
 # Check data quality
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_data_quality();"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_data_quality();"
 ```
 
 ### System Control
@@ -115,7 +119,31 @@ docker-compose restart
 
 # Complete reset (removes all data)
 docker-compose down -v && docker-compose up -d
+
+# Cold start (cleanup + restart)
+./run_solution.sh --cold        # Linux/Mac
+run_solution.bat --cold         # Windows
 ```
+
+## 🔄 Reliability Features
+
+### Retry Logic with Exponential Backoff
+The solution includes robust retry logic for reliable replication setup:
+
+- **Exponential Backoff**: Delays increase exponentially (1s, 2s, 4s, 8s...)
+- **Jitter**: Random variation to prevent thundering herd
+- **Max Retries**: 15 attempts with up to 30-second delays
+- **Automatic Recovery**: Handles timing issues during container startup
+
+### Health Checks
+- **Primary Health Check**: Verifies PostgreSQL readiness and publication existence
+- **Standby Health Check**: Ensures standby is ready for connections
+- **Dependency Management**: Standby waits for primary to be healthy
+
+### Error Handling
+- **Graceful Degradation**: System continues even if some checks fail
+- **Detailed Logging**: Clear error messages and status updates
+- **Recovery Instructions**: Helpful troubleshooting guidance
 
 ## 📊 Test Task Requirements Verification
 
@@ -133,19 +161,19 @@ docker-compose down -v && docker-compose up -d
 
 ```bash
 # Test 1: Verify table structure
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "\d t1"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "\d t1"
 
 # Test 2: Check partitions
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT schemaname, tablename FROM pg_tables WHERE tablename LIKE 't1_%' ORDER BY tablename;"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT schemaname, tablename FROM pg_tables WHERE tablename LIKE 't1_%' ORDER BY tablename;"
 
 # Test 3: Verify materialized view
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT * FROM customer_totals LIMIT 5;"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT * FROM customer_totals LIMIT 5;"
 
 # Test 4: Check replication sync
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT * FROM verify_table_replication();"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT * FROM verify_table_replication();"
 
 # Test 5: Monitor job execution
-docker-compose logs scheduler --tail=20
+docker logs privatbank_scheduler --tail=20
 ```
 
 ## 🚨 Troubleshooting
@@ -167,17 +195,20 @@ docker-compose down && docker-compose up -d
 #### Database connection issues
 ```bash
 # Check if databases are ready
-docker-compose exec postgres-primary pg_isready -U postgres
-docker-compose exec postgres-standby pg_isready -U postgres
+docker exec privatbank_postgres_primary pg_isready -U postgres
+docker exec privatbank_postgres_standby pg_isready -U postgres
 ```
 
 #### Replication not working
 ```bash
 # Check replication status
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_replication_status();"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_replication_status();"
 
-# Manual subscription creation if needed
-docker-compose exec postgres-standby psql -U postgres -d privatbank_test -c "SELECT * FROM pg_subscription;"
+# Check subscription status
+docker exec privatbank_postgres_standby psql -U postgres -d privatbank_test -c "SELECT * FROM pg_subscription;"
+
+# Check retry logic logs
+docker logs privatbank_postgres_standby | grep -E "\[INFO\]|\[SUCCESS\]|\[WARNING\]|\[ERROR\]"
 ```
 
 ### Reset Everything
@@ -200,16 +231,42 @@ If you encounter any issues:
 
 ```
 privatbank-test-task/
-├── docker-compose.yml              # Main orchestration
-├── scheduler.sh                    # Job scheduler script
-├── init_primary.sql               # Primary database initialization
-├── init_standby.sql               # Standby database initialization
-├── schema/                        # Shared database schema
-├── functions/                     # Core PostgreSQL functions
-├── monitoring/                    # Monitoring functions
-├── scripts/                       # Setup and utility scripts
-├── README.md                      # Project documentation
-└── TASK_DESCRIPTION.md           # Task requirements
+├── docker-compose.yml                    # Main orchestration
+├── schema/                              # Shared database schema
+│   ├── create_table_t1.sql              # Partitioned table definition
+│   ├── create_materialized_view.sql     # Customer totals view
+│   └── configure_table_replication.sql  # Replication setup
+├── functions/                           # Core PostgreSQL functions
+│   ├── generate_test_data.sql           # Data generation function
+│   ├── job_insert_transaction.sql       # Insert job function
+│   ├── job_update_status.sql            # Update job function
+│   └── refresh_materialized_view.sql    # MV refresh function
+├── monitoring/                          # Monitoring functions
+│   ├── check_data_quality.sql           # Data quality checks
+│   ├── check_job_status.sql             # Job status monitoring
+│   ├── check_replication_status.sql     # Replication health
+│   ├── check_standby_status.sql         # Standby monitoring
+│   ├── get_replication_lag.sql          # Lag measurement
+│   ├── test_replication.sql             # Replication testing
+│   └── verify_table_replication.sql     # Table replication check
+├── scripts/                             # All scripts and initialization files
+│   ├── init_primary.sql                 # Primary database initialization
+│   ├── init_standby.sql                 # Standby database initialization
+│   ├── scheduler.sh                     # Job scheduler script
+│   ├── primary_health_check.sh          # Primary health check
+│   ├── create_subscription_with_retry.sh # Retry logic for subscription
+│   ├── standby_entrypoint.sh            # Custom standby entrypoint
+│   ├── primary_setup_database.sql       # Primary data setup
+│   ├── primary_setup_replication.sql    # Primary replication setup
+│   ├── standby_setup_replication.sql    # Standby subscription
+│   └── verify_replication_status.sql    # Replication verification
+├── run_solution.sh                      # Linux/Mac startup script
+├── run_solution.bat                     # Windows startup script
+├── test_solution.sh                     # Linux/Mac test script
+├── test_solution.bat                    # Windows test script
+├── README.md                            # Project documentation
+├── SETUP_GUIDE.md                       # This file
+└── TASK_DESCRIPTION.md                  # Task requirements
 ```
 
 ---
