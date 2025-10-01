@@ -45,23 +45,23 @@ docker-compose ps
 ### Database Access
 ```bash
 # Connect to primary database
-docker-compose exec postgres-primary psql -U postgres -d privatebank_test
+docker-compose exec postgres-primary psql -U postgres -d privatbank_test
 
 # Connect to standby database
-docker-compose exec postgres-standby psql -U postgres -d privatebank_test
+docker-compose exec postgres-standby psql -U postgres -d privatbank_test
 ```
 
 ### Monitoring
 ```bash
 # Check replication status
-docker-compose exec postgres-primary psql -U postgres -d privatebank_test -c "SELECT * FROM check_replication_status();"
+docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_replication_status();"
 
 # Check data counts
-docker-compose exec postgres-primary psql -U postgres -d privatebank_test -c "SELECT COUNT(*) FROM t1;"
-docker-compose exec postgres-standby psql -U postgres -d privatebank_test -c "SELECT COUNT(*) FROM t1;"
+docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
+docker-compose exec postgres-standby psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
 
 # Check job status
-docker-compose exec postgres-primary psql -U postgres -d privatebank_test -c "SELECT * FROM check_job_status();"
+docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_job_status();"
 ```
 
 ### System Control

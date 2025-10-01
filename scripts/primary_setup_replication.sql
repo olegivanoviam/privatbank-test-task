@@ -14,7 +14,7 @@ END
 $$;
 
 -- Grant necessary permissions (idempotent)
-GRANT CONNECT ON DATABASE privatebank_test TO replicator;
+GRANT CONNECT ON DATABASE privatbank_test TO replicator;
 GRANT USAGE ON SCHEMA public TO replicator;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO replicator;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO replicator;

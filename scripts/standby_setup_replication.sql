@@ -3,5 +3,5 @@
 
 -- Create subscription to primary
 CREATE SUBSCRIPTION privatbank_subscription
-CONNECTION 'host=postgres-primary port=5432 user=replicator password=replicator_password dbname=privatebank_test'
+CONNECTION 'host=postgres-primary port=5432 user=replicator password=replicator_password dbname=privatbank_test'
 PUBLICATION privatbank_publication;

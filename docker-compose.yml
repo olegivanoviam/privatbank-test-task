@@ -3,7 +3,7 @@ services:
     image: postgres:15
     container_name: privatbank_postgres_primary
     environment:
-      POSTGRES_DB: privatebank_test
+      POSTGRES_DB: privatbank_test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
@@ -45,7 +45,7 @@ services:
     image: postgres:15
     container_name: privatbank_postgres_standby
     environment:
-      POSTGRES_DB: privatebank_test
+      POSTGRES_DB: privatbank_test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
@@ -65,7 +65,7 @@ services:
       postgres
       -c wal_level=logical
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d privatebank_test"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d privatbank_test"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -103,9 +103,9 @@ services:
       echo 'Primary PostgreSQL is ready, starting job scheduler...'
       
       while true; do
-        psql -h postgres-primary -U postgres -d privatebank_test -c 'SELECT job_insert_transaction();' > /dev/null 2>&1
+        psql -h postgres-primary -U postgres -d privatbank_test -c 'SELECT job_insert_transaction();' > /dev/null 2>&1
         sleep 5
-        psql -h postgres-primary -U postgres -d privatebank_test -c 'SELECT job_update_status();' > /dev/null 2>&1 &
+        psql -h postgres-primary -U postgres -d privatbank_test -c 'SELECT job_update_status();' > /dev/null 2>&1 &
         sleep 3
       done
       "
