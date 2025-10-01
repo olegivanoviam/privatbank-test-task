@@ -66,23 +66,23 @@ test_solution.bat         # Windows
 ### Database Access
 ```bash
 # Connect to primary database
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test
 
 # Connect to standby database
-docker-compose exec postgres-standby psql -U postgres -d privatbank_test
+docker exec privatbank_postgres_standby psql -U postgres -d privatbank_test
 ```
 
 ### Monitoring
 ```bash
 # Check replication status
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_replication_status();"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_replication_status();"
 
 # Check data counts
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
-docker-compose exec postgres-standby psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
+docker exec privatbank_postgres_standby psql -U postgres -d privatbank_test -c "SELECT COUNT(*) FROM t1;"
 
 # Check job status
-docker-compose exec postgres-primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_job_status();"
+docker exec privatbank_postgres_primary psql -U postgres -d privatbank_test -c "SELECT * FROM check_job_status();"
 ```
 
 ### System Control
@@ -122,6 +122,7 @@ docker-compose restart
 - **Type**: Logical replication (table-specific)
 - **Primary**: Publishes changes to `privatbank_publication`
 - **Standby**: Subscribes to publication for real-time sync
+- **Retry Logic**: Exponential backoff with jitter for reliable connection
 - **Monitoring**: Built-in replication status functions
 
 ### Job Scheduling
@@ -155,35 +156,42 @@ docker-compose up -d
 
 ```
 privatbank-test-task/
-├── docker-compose.yml              # Main orchestration
-├── scheduler.sh                    # Job scheduler script
-├── init_primary.sql               # Primary database initialization
-├── init_standby.sql               # Standby database initialization
-├── schema/                        # Shared database schema
-│   ├── create_table_t1.sql        # Partitioned table definition
-│   ├── create_materialized_view.sql # Customer totals view
-│   └── configure_table_replication.sql # Replication setup
-├── functions/                     # Core PostgreSQL functions
-│   ├── generate_test_data.sql     # Data generation function
-│   ├── job_insert_transaction.sql # Insert job function
-│   ├── job_update_status.sql      # Update job function
-│   └── refresh_materialized_view.sql # MV refresh function
-├── monitoring/                    # Monitoring functions
-│   ├── check_data_quality.sql     # Data quality checks
-│   ├── check_job_status.sql       # Job status monitoring
-│   ├── check_replication_status.sql # Replication health
-│   ├── check_standby_status.sql   # Standby monitoring
-│   ├── get_replication_lag.sql    # Lag measurement
-│   ├── test_replication.sql       # Replication testing
-│   └── verify_table_replication.sql # Table replication check
-├── scripts/                       # Setup and utility scripts
-│   ├── primary_setup_database.sql # Primary data setup
-│   ├── primary_setup_replication.sql # Primary replication setup
-│   ├── standby_setup_replication.sql # Standby subscription
-│   ├── verify_replication_status.sql # Replication verification
-│   └── primary_health_check.sh    # Primary health check
-├── README.md                      # This file
-└── TASK_DESCRIPTION.md           # Task requirements
+├── docker-compose.yml                    # Main orchestration
+├── schema/                              # Shared database schema
+│   ├── create_table_t1.sql              # Partitioned table definition
+│   ├── create_materialized_view.sql     # Customer totals view
+│   └── configure_table_replication.sql  # Replication setup
+├── functions/                           # Core PostgreSQL functions
+│   ├── generate_test_data.sql           # Data generation function
+│   ├── job_insert_transaction.sql       # Insert job function
+│   ├── job_update_status.sql            # Update job function
+│   └── refresh_materialized_view.sql    # MV refresh function
+├── monitoring/                          # Monitoring functions
+│   ├── check_data_quality.sql           # Data quality checks
+│   ├── check_job_status.sql             # Job status monitoring
+│   ├── check_replication_status.sql     # Replication health
+│   ├── check_standby_status.sql         # Standby monitoring
+│   ├── get_replication_lag.sql          # Lag measurement
+│   ├── test_replication.sql             # Replication testing
+│   └── verify_table_replication.sql     # Table replication check
+├── scripts/                             # All scripts and initialization files
+│   ├── init_primary.sql                 # Primary database initialization
+│   ├── init_standby.sql                 # Standby database initialization
+│   ├── scheduler.sh                     # Job scheduler script
+│   ├── primary_health_check.sh          # Primary health check
+│   ├── create_subscription_with_retry.sh # Retry logic for subscription
+│   ├── standby_entrypoint.sh            # Custom standby entrypoint
+│   ├── primary_setup_database.sql       # Primary data setup
+│   ├── primary_setup_replication.sql    # Primary replication setup
+│   ├── standby_setup_replication.sql    # Standby subscription
+│   └── verify_replication_status.sql    # Replication verification
+├── run_solution.sh                      # Linux/Mac startup script
+├── run_solution.bat                     # Windows startup script
+├── test_solution.sh                     # Linux/Mac test script
+├── test_solution.bat                    # Windows test script
+├── README.md                            # This file
+├── SETUP_GUIDE.md                       # Detailed setup instructions
+└── TASK_DESCRIPTION.md                  # Task requirements
 ```
 
 ---
