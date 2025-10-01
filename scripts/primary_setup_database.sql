@@ -11,7 +11,7 @@ CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 -- Generate initial test data (100k records)
 DO $$
 BEGIN
-    PERFORM generate_test_data(100000, 1000);
+    PERFORM generate_test_data(100000);
     RAISE NOTICE 'Generated 100,000 test records successfully';
 EXCEPTION
     WHEN OTHERS THEN
