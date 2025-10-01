@@ -1,4 +1,4 @@
-﻿services:
+services:
   postgres-primary:
     image: postgres:15
     container_name: privatbank_postgres_primary
@@ -14,6 +14,7 @@
       - ./init_primary.sql:/docker-entrypoint-initdb.d/init_primary.sql
       - ./schema:/schema
       - ./functions:/functions
+      - ./monitoring:/monitoring
       - ./scripts:/scripts
       - .:/root
     command: >
@@ -55,6 +56,7 @@
       - ./init_standby.sql:/docker-entrypoint-initdb.d/init_standby.sql
       - ./schema:/schema
       - ./functions:/functions
+      - ./monitoring:/monitoring
       - ./scripts:/scripts
     depends_on:
       postgres-primary:

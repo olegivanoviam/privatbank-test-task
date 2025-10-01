@@ -26,8 +26,8 @@
 \i functions/job_update_status.sql
 
 -- Create job management functions
-\i functions/check_job_status.sql
-\i functions/check_data_quality.sql
+\\i monitoring/check_job_status.sql
+\\i monitoring/check_data_quality.sql
 
 -- ==============================================
 -- STEP 3: SETUP DATA AND REPLICATION
@@ -44,13 +44,13 @@
 -- ==============================================
 
 -- Create replication monitoring functions
-\i functions/check_replication_status.sql
-\i functions/check_standby_status.sql
-\i functions/verify_table_replication.sql
-\i functions/get_replication_lag.sql
+\\i monitoring/check_replication_status.sql
+\\i monitoring/check_standby_status.sql
+\\i monitoring/verify_table_replication.sql
+\\i monitoring/get_replication_lag.sql
 
 -- Create test replication function
-\i functions/test_replication.sql
+\\i monitoring/test_replication.sql
 
 -- Verify replication setup
 \i scripts/verify_replication_status.sql
