@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🚀 PrivatBank Test Task - Solution Validation"
+echo "???? PrivatBank Test Task - Solution Validation"
 echo "=============================================="
 
 # Colors for output
@@ -20,13 +20,13 @@ print_status() {
     local status=$1
     local message=$2
     if [ "$status" = "PASS" ]; then
-        echo -e "${GREEN}✅ PASS${NC} - $message"
+        echo -e "${GREEN}??? PASS${NC} - $message"
     elif [ "$status" = "FAIL" ]; then
-        echo -e "${RED}❌ FAIL${NC} - $message"
+        echo -e "${RED}??? FAIL${NC} - $message"
     elif [ "$status" = "INFO" ]; then
-        echo -e "${BLUE}ℹ️  INFO${NC} - $message"
+        echo -e "${BLUE}??????  INFO${NC} - $message"
     elif [ "$status" = "WARN" ]; then
-        echo -e "${YELLOW}⚠️  WARN${NC} - $message"
+        echo -e "${YELLOW}??????  WARN${NC} - $message"
     fi
 }
 
@@ -48,7 +48,7 @@ run_sql() {
 
 # Function to check if containers are running
 check_containers() {
-    echo -e "\n${YELLOW}📋 STEP 1: Checking Container Status${NC}"
+    echo -e "\n${YELLOW}???? STEP 1: Checking Container Status${NC}"
     
     if docker-compose ps | grep -q "Up.*healthy.*postgres-primary"; then
         print_status "PASS" "Primary database container is running and healthy"
@@ -74,7 +74,7 @@ check_containers() {
 
 # Function to test database structure
 test_database_structure() {
-    echo -e "\n${YELLOW}📋 STEP 2: Testing Database Structure${NC}"
+    echo -e "\n${YELLOW}???? STEP 2: Testing Database Structure${NC}"
     
     # Test 1: Check if table T1 exists
     if run_sql "postgres-primary" "SELECT COUNT(*) FROM t1;" "Table T1 exists and is accessible" > /dev/null; then
@@ -104,7 +104,7 @@ test_database_structure() {
 
 # Function to test data requirements
 test_data_requirements() {
-    echo -e "\n${YELLOW}📋 STEP 3: Testing Data Requirements${NC}"
+    echo -e "\n${YELLOW}???? STEP 3: Testing Data Requirements${NC}"
     
     # Test 1: Check record count (should be 100,000+)
     primary_count=$(run_sql "postgres-primary" "SELECT COUNT(*) FROM t1;" "Primary record count" | grep -o '[0-9]*')
@@ -135,7 +135,7 @@ test_data_requirements() {
 
 # Function to test replication
 test_replication() {
-    echo -e "\n${YELLOW}📋 STEP 4: Testing Replication${NC}"
+    echo -e "\n${YELLOW}???? STEP 4: Testing Replication${NC}"
     
     # Test 1: Check replication status
     if run_sql "postgres-primary" "SELECT * FROM check_replication_status();" "Replication status" | grep -q "PRIMARY"; then
@@ -163,7 +163,7 @@ test_replication() {
 
 # Function to test scheduled jobs
 test_scheduled_jobs() {
-    echo -e "\n${YELLOW}📋 STEP 5: Testing Scheduled Jobs${NC}"
+    echo -e "\n${YELLOW}???? STEP 5: Testing Scheduled Jobs${NC}"
     
     # Test 1: Check if scheduler is running
     if docker-compose logs scheduler --tail=5 | grep -q "Running.*job"; then
@@ -193,7 +193,7 @@ test_scheduled_jobs() {
 
 # Function to test monitoring functions
 test_monitoring_functions() {
-    echo -e "\n${YELLOW}📋 STEP 6: Testing Monitoring Functions${NC}"
+    echo -e "\n${YELLOW}???? STEP 6: Testing Monitoring Functions${NC}"
     
     # Test all monitoring functions
     functions=("check_replication_status" "check_job_status" "check_data_quality" "get_replication_lag" "verify_table_replication" "test_replication" "check_standby_status")
@@ -222,19 +222,19 @@ main() {
     test_scheduled_jobs || exit 1
     test_monitoring_functions || exit 1
     
-    echo -e "\n${GREEN}🎉 SOLUTION VALIDATION COMPLETE${NC}"
+    echo -e "\n${GREEN}???? SOLUTION VALIDATION COMPLETE${NC}"
     echo "=================================="
-    echo -e "${GREEN}✅ ALL TESTS PASSED${NC}"
+    echo -e "${GREEN}??? ALL TESTS PASSED${NC}"
     echo ""
     echo "The PrivatBank test task solution is working correctly!"
     echo "All requirements have been implemented and tested:"
-    echo "• ✅ Partitioned table T1 with 100k+ records"
-    echo "• ✅ Unique operation_guid constraint"
-    echo "• ✅ Scheduled insert job (every 5s)"
-    echo "• ✅ Scheduled update job (every 3s)"
-    echo "• ✅ Materialized view with auto-refresh"
-    echo "• ✅ Logical replication to standby"
-    echo "• ✅ Comprehensive monitoring"
+    echo "??? ??? Partitioned table T1 with 100k+ records"
+    echo "??? ??? Unique operation_guid constraint"
+    echo "??? ??? Scheduled insert job (every 5s)"
+    echo "??? ??? Scheduled update job (every 3s)"
+    echo "??? ??? Materialized view with auto-refresh"
+    echo "??? ??? Logical replication to standby"
+    echo "??? ??? Comprehensive monitoring"
     echo ""
     echo "The solution is ready for production use!"
 }
