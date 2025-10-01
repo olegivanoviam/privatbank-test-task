@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS t1 (
     message JSONB NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    CONSTRAINT uk_t1_operation_guid UNIQUE (operation_guid, date)
+    CONSTRAINT uk_t1_operation_guid UNIQUE (operation_guid)
 ) PARTITION BY RANGE (date);
 
 -- Create partitions for 2024 (12 months) - idempotent
