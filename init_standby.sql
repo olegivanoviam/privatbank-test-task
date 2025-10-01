@@ -17,13 +17,6 @@
 \i schema/configure_table_replication.sql
 
 -- ==============================================
--- STEP 3: CREATE SUBSCRIPTION
--- ==============================================
-
--- Create subscription to primary
-\i scripts/standby_setup_replication.sql
-
--- ==============================================
 -- INITIALIZATION COMPLETE
 -- ==============================================
 
