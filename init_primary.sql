@@ -30,17 +30,21 @@
 \i monitoring/check_data_quality.sql
 
 -- ==============================================
--- STEP 3: SETUP DATA AND REPLICATION
+-- STEP 3: SETUP REPLICATION FIRST
 -- ==============================================
 
--- Generate test data and setup database
-\i scripts/primary_setup_database.sql
-
--- Setup primary server for logical replication
+-- Setup primary server for logical replication (BEFORE data insertion)
 \i scripts/primary_setup_replication.sql
 
 -- ==============================================
--- STEP 4: MONITORING AND VERIFICATION
+-- STEP 4: GENERATE DATA (WITH REPLICATION)
+-- ==============================================
+
+-- Generate test data and setup database (AFTER replication is ready)
+\i scripts/primary_setup_database.sql
+
+-- ==============================================
+-- STEP 5: MONITORING AND VERIFICATION
 -- ==============================================
 
 -- Create replication monitoring functions
@@ -61,3 +65,4 @@
 
 SELECT 'Primary database initialization completed successfully!' as status;
 SELECT 'All tables, functions, and replication are ready!' as message;
+
