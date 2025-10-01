@@ -63,4 +63,4 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Add comment
-COMMENT ON FUNCTION generate_test_data(INTEGER, INTEGER) IS 'Generates test data for PrivatBank test task';
+COMMENT ON FUNCTION generate_test_data(INTEGER) IS 'Generates test data for PrivatBank test task';
