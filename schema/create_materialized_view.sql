@@ -1,5 +1,6 @@
-﻿-- PrivatBank Test Task - Materialized View
+-- PrivatBank Test Task - Materialized View
 -- Customer transaction totals with automatic refresh
+-- Shared materialized view for both primary and standby servers
 
 -- Create materialized view for customer totals by customer_id and operation_type
 CREATE MATERIALIZED VIEW customer_totals AS

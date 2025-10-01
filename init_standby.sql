@@ -1,20 +1,20 @@
 -- PrivatBank Test Task - Standby Database Initialization
 -- This script initializes the standby database for logical replication
+-- NOTE: Table structure must be IDENTICAL to primary for logical replication
 
 -- ==============================================
--- STEP 1: CREATE DATABASE SCHEMA
+-- STEP 1: CREATE DATABASE SCHEMA (IDENTICAL TO PRIMARY)
 -- ==============================================
 
--- Create the same table structure as primary
-\i schema/standby/create_table_t1.sql
-
+-- Create the EXACT same table structure as primary
+\i schema/create_table_t1.sql
 
 -- ==============================================
 -- STEP 2: SETUP REPLICATION
 -- ==============================================
 
 -- Set up replica identity for logical replication
-\i schema/standby/setup_replication.sql
+\i schema/setup_replication.sql
 
 -- ==============================================
 -- STEP 3: CREATE SUBSCRIPTION

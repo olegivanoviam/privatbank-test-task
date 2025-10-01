@@ -6,13 +6,13 @@
 -- ==============================================
 
 -- Create the main partitioned table T1
-\i schema/primary/create_table_t1.sql
+\i schema/create_table_t1.sql
 
 -- Create materialized view (depends on table T1)
-\i schema/primary/create_materialized_view.sql
+\i schema/create_materialized_view.sql
 
 -- Setup replication for table T1
-\i schema/primary/setup_replication.sql
+\i schema/setup_replication.sql
 
 -- ==============================================
 -- STEP 2: CREATE FUNCTIONS

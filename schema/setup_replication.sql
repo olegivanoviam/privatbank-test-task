@@ -1,5 +1,6 @@
--- PrivatBank Test Task - Standby Replication Setup
+-- PrivatBank Test Task - Replication Setup
 -- Sets up replica identity for logical replication
+-- Shared replication setup for both primary and standby servers
 
 -- Set replica identity for logical replication
 ALTER TABLE t1 REPLICA IDENTITY FULL;

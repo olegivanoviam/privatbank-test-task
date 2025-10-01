@@ -1,5 +1,6 @@
 -- PrivatBank Test Task - Table T1 Schema
 -- Partitioned table for transaction data
+-- Shared schema for both primary and standby servers
 
 -- Create the main partitioned table
 CREATE TABLE t1 (
