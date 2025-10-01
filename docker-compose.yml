@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_primary_data:/var/lib/postgresql/data
-      - ./init_primary.sql:/docker-entrypoint-initdb.d/init_primary.sql
+      - ./scripts/init_primary.sql:/docker-entrypoint-initdb.d/init_primary.sql
       - ./schema:/schema
       - ./functions:/functions
       - ./monitoring:/monitoring
@@ -23,7 +23,7 @@ services:
       -c max_replication_slots=3
       -c max_wal_senders=3
     healthcheck:
-      test: ["CMD-SHELL", "/root/primary_health_check.sh"]
+      test: ["CMD-SHELL", "/scripts/primary_health_check.sh"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -53,7 +53,7 @@ services:
       - "5433:5432"
     volumes:
       - postgres_standby_data:/var/lib/postgresql/data
-      - ./init_standby.sql:/docker-entrypoint-initdb.d/init_standby.sql
+      - ./scripts/init_standby.sql:/docker-entrypoint-initdb.d/init_standby.sql
       - ./schema:/schema
       - ./functions:/functions
       - ./monitoring:/monitoring
@@ -92,7 +92,7 @@ services:
       PGPASSWORD: postgres
     volumes:
       - ./scripts:/scripts
-      - ./scheduler.sh:/scheduler.sh
+      - ./scripts/scheduler.sh:/scheduler.sh
     command: ["/scheduler.sh"]
     restart: unless-stopped
     deploy:
