@@ -28,6 +28,9 @@ while true; do
     sleep 5
 done &
 
+# Small delay to avoid startup collision with insert job
+sleep 1
+
 # Run update job every 3 seconds (in background)
 while true; do
     echo "$(date): Running update job..."
