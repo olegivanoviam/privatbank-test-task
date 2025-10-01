@@ -21,7 +21,9 @@ BEGIN
         GET DIAGNOSTICS updated_count = ROW_COUNT;
         
         IF updated_count > 0 THEN
-            RAISE NOTICE 'Updated % even ID transactions from pending to completed', updated_count;
+            -- Refresh materialized view when status changes from 0 to 1
+            PERFORM refresh_materialized_view();
+            RAISE NOTICE 'Updated % even ID transactions from pending to completed and refreshed materialized view', updated_count;
         END IF;
     ELSE
         -- Odd second: update odd ids from 0 to 1
@@ -33,12 +35,14 @@ BEGIN
         GET DIAGNOSTICS updated_count = ROW_COUNT;
         
         IF updated_count > 0 THEN
-            RAISE NOTICE 'Updated % odd ID transactions from pending to completed', updated_count;
+            -- Refresh materialized view when status changes from 0 to 1
+            PERFORM refresh_materialized_view();
+            RAISE NOTICE 'Updated % odd ID transactions from pending to completed and refreshed materialized view', updated_count;
         END IF;
     END IF;
 END;
 $$ LANGUAGE plpgsql;
 
 -- Add comment
-COMMENT ON FUNCTION job_update_status() IS 'Scheduled job to update transaction status for PrivatBank test task';
+COMMENT ON FUNCTION job_update_status() IS 'Scheduled job to update transaction status from 0 to 1 and refresh materialized view for PrivatBank test task';
 

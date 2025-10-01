@@ -21,6 +21,9 @@
 -- Create data generation function
 \i functions/generate_test_data.sql
 
+-- Create materialized view refresh function
+\i functions/refresh_materialized_view.sql
+
 -- Create scheduled job functions
 \i functions/job_insert_transaction.sql
 \i functions/job_update_status.sql

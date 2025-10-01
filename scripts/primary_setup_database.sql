@@ -21,8 +21,7 @@ END $$;
 -- Refresh materialized view
 DO $$
 BEGIN
-    REFRESH MATERIALIZED VIEW customer_totals;
-    RAISE NOTICE 'Materialized view customer_totals refreshed successfully';
+    PERFORM refresh_materialized_view();
 EXCEPTION
     WHEN OTHERS THEN
         RAISE WARNING 'Failed to refresh materialized view: %', SQLERRM;
