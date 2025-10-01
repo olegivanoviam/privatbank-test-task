@@ -11,8 +11,8 @@
 -- Create materialized view (depends on table T1)
 \i schema/create_materialized_view.sql
 
--- Setup replication for table T1
-\i schema/setup_replication.sql
+-- Configure table T1 for replication
+\i schema/configure_table_replication.sql
 
 -- ==============================================
 -- STEP 2: CREATE FUNCTIONS

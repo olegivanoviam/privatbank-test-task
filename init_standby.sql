@@ -13,8 +13,8 @@
 -- STEP 2: SETUP REPLICATION
 -- ==============================================
 
--- Set up replica identity for logical replication
-\i schema/setup_replication.sql
+-- Configure table for logical replication
+\i schema/configure_table_replication.sql
 
 -- ==============================================
 -- STEP 3: CREATE SUBSCRIPTION
