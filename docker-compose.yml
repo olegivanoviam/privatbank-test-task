@@ -15,16 +15,17 @@
       - ./schema:/schema
       - ./functions:/functions
       - ./scripts:/scripts
+      - .:/root
     command: >
       postgres
       -c wal_level=logical
       -c max_replication_slots=3
       -c max_wal_senders=3
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d privatebank_test"]
+      test: ["CMD-SHELL", "/root/primary_health_check.sh"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
     restart: unless-stopped
     deploy:
       resources:
